@@ -9,13 +9,27 @@ from recruit_tracker_api.constants import OPENAI_API_KEY
 
 student_router = APIRouter()
 
-
-@student_router.get("/")
-async def root():
-    return {"message": "FAST!"}
-
-
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+
+@student_router.get("/student/...")
+async def read():
+    ...
+
+
+@student_router.get("/student/create")
+async def create():
+    ...
+
+
+@student_router.get("/student/update")
+async def update():
+    ...
+
+
+@student_router.get("/student/delete")
+async def delete():
+    ...
 
 
 @student_router.post("/api/testgpt")
