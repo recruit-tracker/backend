@@ -42,9 +42,7 @@ async def read(request: Request):
 
 @student_router.post("/student")
 async def create(request: Request):
-
-
-    try: 
+    try:
         json = await request.json()
         user = json["user"]
 
@@ -55,19 +53,47 @@ async def create(request: Request):
         user_collection = db["users"]
 
         user_collection.insert_one({"_id": user.get("email"), **user})
-        
+
+        client.close()
         return JSONResponse(content={"creation": str("success")}, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
+
 @student_router.get("/student/update")
-async def update():
-    ...
+async def update(request: Request):
+    try:
+        json = await request.json()
+        user = json["user"]
+        assert user.get("email")
+
+        client = init_mongo(url)
+        db = client["recruit_tracker"]
+        user_collection = db["users"]
+
+        user_collection.update_one({"_id": user.get("email")}, {"$set": {**user}})
+        client.close()
+
+        return JSONResponse(content={"update": "success"}, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=200)
 
 
 @student_router.get("/student/delete")
-async def delete():
-    ...
+async def delete(request: Request):
+    try:
+        json = await request.json()
+        user = json["user"]
+        assert user.get("email")
+
+        client = init_mongo(url)
+        db = client["recruit_tracker"]
+        user_collection = db["users"]
+
+        user_collection.delete_one({"_id": user.get("email")})
+        return JSONResponse(content={"update": "success"}, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=200)
 
 
 @student_router.post("/api/testgpt")
