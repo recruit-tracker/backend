@@ -1,23 +1,26 @@
 # PDM
 import requests
 from fastapi import APIRouter, Request
-from openai import OpenAI
 from fastapi.responses import JSONResponse
+from openai import OpenAI
 
 from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.constants import OPENAI_API_KEY
-from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.mongo import init_mongo
+
 student_router = APIRouter()
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+
 
 @student_router.post("/student/query")
 async def read(request: Request):
     try:
         request_json = await request.json()
         content = request_json["content"]
-        filter_conditions = request_json.get("filter", {})  # Default to an empty filter if not provided
+        filter_conditions = request_json.get(
+            "filter", {}
+        )  # Default to an empty filter if not provided
 
         client = init_mongo(url)
         db = client["recruit_tracker"]
@@ -38,6 +41,18 @@ async def read(request: Request):
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
+@student_router.post("/student")
+async def create(request: Request):
+    json = await request.json()
+    user = json["user"]
+
+    assert user.get("email")
+
+    client = init_mongo(url)
+    db = client["recruit_tracker"]
+    user_collection = db["users"]
+
+    user_collection.insert_one({"_id": user.get("email"), **user})
 
 
 @student_router.get("/student/update")
