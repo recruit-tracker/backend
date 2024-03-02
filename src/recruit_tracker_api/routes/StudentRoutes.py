@@ -1,11 +1,11 @@
 # PDM
 import requests
-from fastapi import APIRouter, FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, Request
 from openai import OpenAI
-from starlette.responses import JSONResponse
 
+from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.constants import OPENAI_API_KEY
+from recruit_tracker_api.mongo import init_mongo
 
 student_router = APIRouter()
 
@@ -18,8 +18,10 @@ async def read():
 
 
 @student_router.get("/student/create")
-async def create():
-    ...
+async def create(request: Request):
+    json = await request.json()
+
+    client = init_mongo(url)
 
 
 @student_router.get("/student/update")
