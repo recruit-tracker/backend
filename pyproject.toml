@@ -1,0 +1,13 @@
+
+[project]
+name = "Recruit Tracker API"
+version = ""
+description = ""
+authors = [
+    {name = "Jayden Pyles", email = "jpyles@uab.edu"},
+]
+dependencies = [
+    "fastapi>=0.110.0",
+]
+requires-python = ">=3.10"
+license = {text = "MIT"}
