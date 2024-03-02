@@ -2,7 +2,6 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from openai import OpenAI
-
 from pymongo import errors
 
 from recruit_tracker_api.constants import MONGO_URL as url
@@ -58,11 +57,13 @@ async def create(request: Request):
 
         client.close()
         return JSONResponse(content={"creation": str("success")}, status_code=200)
-    
-    
-    except errors.DuplicateKeyError as dke:
-        return JSONResponse(content={"error": "Account with that email already exists."}, status_code=409)
-    
+
+    except errors.DuplicateKeyError:
+        return JSONResponse(
+            content={"error": "Account with that email already exists."},
+            status_code=409,
+        )
+
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
