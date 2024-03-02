@@ -2,6 +2,7 @@
 import requests
 from fastapi import APIRouter, Request
 from openai import OpenAI
+from fastapi.responses import JSONResponse
 
 from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.constants import OPENAI_API_KEY
@@ -11,20 +12,32 @@ student_router = APIRouter()
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-
 @student_router.post("/student/query")
 async def read(request: Request):
-    
-    request_json = await request.json()
-    content = request_json["content"]
-    _filter = request_json["filter"]
-    
-    client = init_mongo(url)
-    db = client("recruit_tracker")
-    user_collection = db("users")
+    try:
+        request_json = await request.json()
+        content = request_json["content"]
+        filter_conditions = request_json.get("filter", {})  # Default to an empty filter if not provided
+
+        client = init_mongo(url)
+        db = client["recruit_tracker"]
+        user_collection = db["users"]
+
+        # Apply the filter conditions to the query
+        result = user_collection.find(filter_conditions)
+
+        # Convert the result to a list if needed
+        result_list = list(result)
+
+        # Close the MongoDB connection
+        client.close()
+
+        return JSONResponse(content=result_list, status_code=200)
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
-    ...
 
 
 @student_router.get("/student/update")
