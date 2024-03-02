@@ -1,8 +1,12 @@
 # PDM
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from fastapi import HTTPException
+
 from openai import OpenAI
 from pymongo import errors
+
+import recruit_tracker_api.utils as utils
 
 from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.constants import OPENAI_API_KEY
@@ -18,21 +22,15 @@ async def read(request: Request):
     try:
         request_json = await request.json()
         content = request_json["content"]
-        filter_conditions = request_json.get(
-            "filter", {}
-        )  # Default to an empty filter if not provided
+        filter_conditions = request_json.get("filter", {})
 
         client = init_mongo(url)
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
-        # Apply the filter conditions to the query
         result = user_collection.find(filter_conditions)
-
-        # Convert the result to a list if needed
         result_list = list(result)
 
-        # Close the MongoDB connection
         client.close()
 
         return JSONResponse(content={"users": result_list}, status_code=200)
@@ -52,6 +50,10 @@ async def create(request: Request):
         client = init_mongo(url)
         db = client["recruit_tracker"]
         user_collection = db["users"]
+
+        # hash password
+        hash_pw = utils.hash_password(user.get("password"))
+        user["password"] = hash_pw
 
         user_collection.insert_one({"_id": user.get("email"), **user})
 
@@ -102,6 +104,41 @@ async def delete(request: Request):
         return JSONResponse(content={"update": "success"}, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=200)
+
+
+
+@student_router.post("/student/login")
+async def login(request: Request):
+    try:
+        json_data = await request.json()
+        user = json_data.get("user")
+        assert user and user.get("email") and user.get("password"), "Email and password are required."
+
+        client = init_mongo(url)
+        db = client["recruit_tracker"]
+        user_collection = db["users"]
+
+        user_email = user.get("email")
+        
+        result = user_collection.find_one({"email": user_email})
+
+        if not result:
+            raise HTTPException(status_code=401, detail="Email not found.")
+
+        if not utils.verify_password(user.get("password"), result.get("password")):
+            raise HTTPException(status_code=401, detail="Password does not match email.")
+
+        return JSONResponse(content={"login": "Login successful!"}, status_code=200)
+
+    except HTTPException as he:
+        return JSONResponse(content={"login": str(he.detail)}, status_code=he.status_code)
+
+    except AssertionError as ae:
+        return JSONResponse(content={"error": str(ae)}, status_code=400)
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
 
 
 @student_router.post("/api/testgpt")
