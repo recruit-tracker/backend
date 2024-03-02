@@ -1,7 +1,7 @@
 
 [project]
-name = "Recruit Tracker API"
-version = ""
+name = "recruit_tracker_api"
+version = "0.1.0"
 description = ""
 authors = [
     {name = "Jayden Pyles", email = "jpyles@uab.edu"},
