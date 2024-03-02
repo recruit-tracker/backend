@@ -3,6 +3,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from openai import OpenAI
 
+from pymongo import errors
+
 from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.constants import OPENAI_API_KEY
 from recruit_tracker_api.mongo import init_mongo
@@ -56,11 +58,16 @@ async def create(request: Request):
 
         client.close()
         return JSONResponse(content={"creation": str("success")}, status_code=200)
+    
+    
+    except errors.DuplicateKeyError as dke:
+        return JSONResponse(content={"error": "Account with that email already exists."}, status_code=409)
+    
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
-@student_router.get("/student/update")
+@student_router.post("/student/update")
 async def update(request: Request):
     try:
         json = await request.json()
@@ -76,10 +83,10 @@ async def update(request: Request):
 
         return JSONResponse(content={"update": "success"}, status_code=200)
     except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=200)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
-@student_router.get("/student/delete")
+@student_router.post("/student/delete")
 async def delete(request: Request):
     try:
         json = await request.json()
