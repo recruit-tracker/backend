@@ -5,23 +5,26 @@ from openai import OpenAI
 
 from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.constants import OPENAI_API_KEY
+from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.mongo import init_mongo
-
 student_router = APIRouter()
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
-@student_router.get("/student/...")
-async def read():
-    ...
-
-
-@student_router.get("/student/create")
-async def create(request: Request):
-    json = await request.json()
-
+@student_router.post("/student/query")
+async def read(request: Request):
+    
+    request_json = await request.json()
+    content = request_json["content"]
+    _filter = request_json["filter"]
+    
     client = init_mongo(url)
+    db = client("recruit_tracker")
+    user_collection = db("users")
+
+
+    ...
 
 
 @student_router.get("/student/update")
