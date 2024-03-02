@@ -2,9 +2,9 @@
 from fastapi import APIRouter, Request
 from starlette.responses import JSONResponse
 
-router = APIRouter()
+student_router = APIRouter()
 
 
-@router.get("/")
+@student_router.get("/")
 async def root():
     return {"message": "FAST!"}
