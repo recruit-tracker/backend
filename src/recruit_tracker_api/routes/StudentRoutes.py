@@ -1,5 +1,4 @@
 # PDM
-import requests
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from openai import OpenAI
@@ -35,7 +34,7 @@ async def read(request: Request):
         # Close the MongoDB connection
         client.close()
 
-        return JSONResponse(content=result_list, status_code=200)
+        return JSONResponse(content={"users": result_list}, status_code=200)
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
@@ -43,17 +42,23 @@ async def read(request: Request):
 
 @student_router.post("/student")
 async def create(request: Request):
-    json = await request.json()
-    user = json["user"]
 
-    assert user.get("email")
 
-    client = init_mongo(url)
-    db = client["recruit_tracker"]
-    user_collection = db["users"]
+    try: 
+        json = await request.json()
+        user = json["user"]
 
-    user_collection.insert_one({"_id": user.get("email"), **user})
+        assert user.get("email")
 
+        client = init_mongo(url)
+        db = client["recruit_tracker"]
+        user_collection = db["users"]
+
+        user_collection.insert_one({"_id": user.get("email"), **user})
+        
+        return JSONResponse(content={"creation": str("success")}, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 @student_router.get("/student/update")
 async def update():
