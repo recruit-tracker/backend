@@ -117,3 +117,18 @@ def binary_to_text(pdf_binary_data):
         # Handle exceptions, such as invalid PDF format
         print(f"Error converting PDF to text: {e}")
         return None
+
+def pdf_to_bytes(pdf_data):
+    pdf_reader = PyPDF2.PdfFileReader(pdf_data)
+    pdf_writer = PyPDF2.PdfFileWriter()
+
+    # Copy all pages from the reader to the writer
+    for page_num in range(pdf_reader.getNumPages()):
+        pdf_writer.addPage(pdf_reader.getPage(page_num))
+
+    # Create a new byte stream for the output PDF
+    pdf_output = io.BytesIO()
+    pdf_writer.write(pdf_output)
+    pdf_bytes = pdf_output.getvalue()
+
+    return pdf_bytes

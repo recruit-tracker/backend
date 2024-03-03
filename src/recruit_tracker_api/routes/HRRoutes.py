@@ -98,22 +98,6 @@ async def prompt_gpt(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
-
-
-
-
-
-            
-            # pdf = fs.find_one({"metadata.user_email": user_email})
-
-            # _pdf = base64.b64decode(pdf.read())
-            # txt = bytes_to_utf8(_pdf)
-
-            # prompt = "Rate this resume on a scale of 1-10 based on criteria like format, human readability, and other relevant info."
-            # print(txt)
-            # response = utils.send_pdf_to_gpt(txt, prompt)
-            # print(response)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
     
