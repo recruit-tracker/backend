@@ -1,9 +1,11 @@
 # PDM
 import tempfile
+from tempfile import NamedTemporaryFile
 
 from bson.objectid import ObjectId
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import (FileResponse, JSONResponse, Response,
+                               StreamingResponse)
 from gridfs import GridFS
 from openai import OpenAI
 from pymongo import errors
@@ -42,7 +44,9 @@ async def resume(request: Request):
     user_collection = db["users"]
 
     # Retrieve PDF ID from user document
-    pdf_ID = user_collection.find_one({"email": email}).get("pdf_ID")
+    user = user_collection.find_one({"_id": email})
+    print(user)
+    pdf_ID = user.get("pdf_ID")
 
     if not pdf_ID:
         return {"error": "PDF not found for the user."}
@@ -54,8 +58,14 @@ async def resume(request: Request):
     if file_obj is None:
         return {"error": "PDF not found in GridFS."}
 
-    # Return the PDF file using FileResponse
-    return FileResponse(file_obj, media_type="application/pdf")
+    # Retrieve the binary content of the PDF
+    pdf_binary = file_obj.read()
+
+    # Set Content-Disposition header with filename
+    headers = {"Content-Disposition": f'attachment; filename="resume.pdf"'}
+
+    # Return the binary content with appropriate headers
+    return Response(content=pdf_binary, media_type="application/pdf", headers=headers)
 
 
 @student_router.post("/student/query")
