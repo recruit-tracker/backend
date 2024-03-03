@@ -148,7 +148,7 @@ async def create(request: Request):
 
         user["resume_hash"] = ""
 
-        print(user)
+        # print(user)
         user_collection.insert_one({"_id": user.get("email"), **user})
 
         client.close()

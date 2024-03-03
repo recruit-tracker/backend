@@ -10,7 +10,7 @@ GPT_API_ENDPOINT = 'https://api.openai.com/v1/engines/davinci-codex/completions'
 
 from recruit_tracker_api.constants import OPENAI_API_KEY as GPT_KEY
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, File, HTTPException, UploadFile
 from fastapi.security import OAuth2PasswordBearer
 
 from gridfs import GridFS
@@ -87,16 +87,26 @@ def binary_to_pdf(binary_data):
     return pdf_buffer
 
 
-def csv_to_json(csv_file_path):
+async def import_csv(file: UploadFile = File(...)):
     json_data = []
 
-    with open(csv_file_path, "r") as csv_file:
-        csv_reader = csv.DictReader(csv_file)
-        for row in csv_reader:
-            print(row)
+    # Process the uploaded CSV file
+    content = await file.read()
+    content_str = content.decode("utf-8").split("\n")
+
+    # Assuming the first row is the header
+    headers = content_str[0].split(",")
+
+    for line in content_str[1:]:
+        if line:
+            values = line.split(",")
+            row = dict(zip(headers, values))
             json_data.append(row)
 
-    return json_data
+    
+    return {"json_data": json_data}
+
+
 
 def binary_to_text(pdf_binary_data):
     try:
@@ -162,3 +172,6 @@ def convert_pdf_to_png(input_path):
         # Write the combined PDF to the same file
         with open(input_path, "wb") as output_file:
             output_pdf.write(output_file)
+
+
+# print(csv_to_json("data.csv"))

@@ -12,7 +12,7 @@ import pdfplumber
 import pymongo
 import PyPDF2
 from bson.objectid import ObjectId
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from starlette.responses import JSONResponse
 
 import recruit_tracker_api.utils as utils
@@ -33,25 +33,36 @@ async def root():
 
 
 @hr_router.post("/hr/import")
-async def import_csv(request: Request):
+async def import_csv(file: UploadFile = File(...)):
     try:
-        json_data = await request.json()
-        path = json_data.get("path")
-        assert "path" in path
+        content = await file.read()
+        content_str = content.decode("utf-8").split("\n")
+
+        # Assuming the first row is the header
+        headers = content_str[0].split(",")
+
+        # Create a list of dictionaries from the CSV data
+        json_data = []
+        for line in content_str[1:]:
+            if line:
+                values = line.split(",")
+                row = dict(zip(headers, values))
+                json_data.append(row)
+
+        # Now you can use json_data to insert into MongoDB or perform any other necessary operations
 
         client = init_mongo(url)
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
-        json_csv = utils.csv_to_json(path["path"])
-
-        user_collection.insert_many(json_csv)
+        user_collection.insert_many(json_data)
 
         client.close()
 
-        return JSONResponse(content={"Import": "Import Successful!"}, status_code=200)
+        return {"Import": "Import Successful!"}
     except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+        return {"error": str(e)}
+
 
 
 @hr_router.post("/hr/suggestion")
