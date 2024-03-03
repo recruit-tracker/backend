@@ -42,7 +42,6 @@ async def read(request: Request):
 
         if content is not None and filter_conditions: result = user_collection.find(filter_conditions)
         else: result = user_collection.find({})
-
         result_list = list(result)
 
         for user in result_list: user["_id"] = str(user["_id"])

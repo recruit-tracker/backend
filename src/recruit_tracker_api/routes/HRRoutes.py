@@ -11,9 +11,8 @@ from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.mongo import init_mongo
 import pdfplumber
 
-
-
 openAI_client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
 
 hr_router = APIRouter()
 
@@ -140,3 +139,4 @@ def bytes_to_utf8(pdf_bytes):
     except Exception as e:
         print(f"Error processing PDF file: {str(e)}")
         return None
+

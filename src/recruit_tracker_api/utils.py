@@ -15,6 +15,8 @@ from fastapi.security import OAuth2PasswordBearer
 
 from gridfs import GridFS
 from pymongo import MongoClient
+import csv
+import json
 
 from recruit_tracker_api.constants import ALGORITHM, SECRET_KEY
 
@@ -145,3 +147,4 @@ def binary_to_text(pdf_binary_data):
         # Handle exceptions, such as invalid PDF format
         print(f"Error converting PDF to text: {e}")
         return None
+
