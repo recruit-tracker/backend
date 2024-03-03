@@ -2,6 +2,7 @@ FROM python:3.10-slim
 
 RUN python -m pip --no-cache-dir install pdm
 RUN pdm config python.use_venv false
+RUN pip install python-multipart
 
 COPY pyproject.toml pdm.lock /project/
 

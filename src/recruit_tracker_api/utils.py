@@ -16,6 +16,7 @@ from recruit_tracker_api.constants import ALGORITHM, SECRET_KEY
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
@@ -28,7 +29,9 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 def create_jwt_token(user: dict):
     to_encode = {
-        str(key): value if isinstance(value, (str, int, float, bool, type(None))) else str(value)
+        str(key): value
+        if isinstance(value, (str, int, float, bool, type(None)))
+        else str(value)
         for key, value in user.items()
     }
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -57,15 +60,14 @@ def decode_role(current_user: dict = Depends(get_current_user)):
     return current_user.get("role")
 
 
-
-def store_pdf(db, pdf):
+def store_pdf(db, pdf, email):
     fs = GridFS(db, collection="pdfs")  # Use a custom collection for PDFs
 
     sha256 = hashlib.sha256()
-    sha256.update(pdf.encode())
+    sha256.update(pdf)
     file_hash = sha256.hexdigest()
 
-    fs.put(pdf.encode(), metadata={"hash": file_hash})
+    fs.put(pdf, metadata={"hash": file_hash, "user_email": email})
     return file_hash
 
 

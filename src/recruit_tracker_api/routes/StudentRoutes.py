@@ -1,5 +1,5 @@
 # PDM
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 from gridfs import GridFS
 from openai import OpenAI
@@ -15,6 +15,19 @@ student_router = APIRouter()
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
+@student_router.post("/upload")
+async def upload(email: str = Form(...), resume: UploadFile = File(...)):
+    client = init_mongo(url)
+    db = client["recruit_tracker"]
+
+    pdf = await resume.read()
+
+    file_hash = utils.store_pdf(db, pdf, email)  # store pdf in db
+
+    user_collection = db["users"]
+    user_collection.update_one({"_id": email}, {"$set": {"resume_hash": file_hash}})
+
+
 @student_router.post("/student/query")
 async def read(request: Request):
     try:
@@ -26,12 +39,15 @@ async def read(request: Request):
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
-        if content is not None and filter_conditions: result = user_collection.find(filter_conditions)
-        else: result = user_collection.find({})
+        if content is not None and filter_conditions:
+            result = user_collection.find(filter_conditions)
+        else:
+            result = user_collection.find({})
 
         result_list = list(result)
 
-        for user in result_list: user["_id"] = str(user["_id"])
+        for user in result_list:
+            user["_id"] = str(user["_id"])
 
         client.close()
 
@@ -39,7 +55,6 @@ async def read(request: Request):
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
-
 
 
 @student_router.post("/student")
@@ -59,6 +74,8 @@ async def create(request: Request):
         user["password"] = hash_pw
 
         pdf = user.get("resume")
+
+        print(user)
 
         if pdf:
             file_hash = utils.store_pdf(db, pdf)  # store pdf in db

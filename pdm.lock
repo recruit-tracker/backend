@@ -200,6 +200,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "python-multipart"
+version = "0.0.9"
+requires_python = ">=3.8"
+summary = "A streaming multipart parser for Python"
+
+[[package]]
 name = "requests"
 version = "2.31.0"
 requires_python = ">=3.7"
@@ -262,7 +268,7 @@ dependencies = [
 lock_version = "4.2"
 cross_platform = true
 groups = ["default"]
-content_hash = "sha256:5427f0da8d65f3054e4698a5a53dbee1543c9fa0701e0f31ab437b1188ae06e9"
+content_hash = "sha256:837b8229823d09a1f1b551ede5042e21c6e0642b3f730508a1fa63e5df158958"
 
 [metadata.files]
 "annotated-types 0.6.0" = [
@@ -709,6 +715,10 @@ content_hash = "sha256:5427f0da8d65f3054e4698a5a53dbee1543c9fa0701e0f31ab437b118
     {url = "https://files.pythonhosted.org/packages/f9/a6/405d38f2dc6425cf2b0aa6664e652a4dd2f7cb9b2b6c244e20d9cb86917a/pymongo-4.6.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f251db26c239aec2a4d57fbe869e0a27b7f6b5384ec6bf54aeb4a6a5e7408234"},
     {url = "https://files.pythonhosted.org/packages/fe/32/4029c96ff01cbdfbe0d0c121cfea17b080be03576662678bb1c4906ba502/pymongo-4.6.2-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:d788cb5cc947d78934be26eef1623c78cec3729dc93a30c23f049b361aa6d835"},
     {url = "https://files.pythonhosted.org/packages/fe/cc/a5a169f45c9a2f80b60b8f41365f06e15ed7c93778a17e69225ecb01b1eb/pymongo-4.6.2-cp312-cp312-win_amd64.whl", hash = "sha256:f673b64a0884edcc56073bda0b363428dc1bf4eb1b5e7d0b689f7ec6173edad6"},
+]
+"python-multipart 0.0.9" = [
+    {url = "https://files.pythonhosted.org/packages/3d/47/444768600d9e0ebc82f8e347775d24aef8f6348cf00e9fa0e81910814e6d/python_multipart-0.0.9-py3-none-any.whl", hash = "sha256:97ca7b8ea7b05f977dc3849c3ba99d51689822fab725c3703af7c866a0c2b215"},
+    {url = "https://files.pythonhosted.org/packages/5c/0f/9c55ac6c84c0336e22a26fa84ca6c51d58d7ac3a2d78b0dfa8748826c883/python_multipart-0.0.9.tar.gz", hash = "sha256:03f54688c663f1b7977105f021043b0793151e4cb1c1a9d4a11fc13d622c4026"},
 ]
 "requests 2.31.0" = [
     {url = "https://files.pythonhosted.org/packages/70/8e/0e2d847013cb52cd35b38c009bb167a1a26b2ce6cd6965bf26b47bc0bf44/requests-2.31.0-py3-none-any.whl", hash = "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f"},
