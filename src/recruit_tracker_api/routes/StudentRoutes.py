@@ -41,7 +41,8 @@ async def read(request: Request):
         return JSONResponse(content={"users": result_list}, status_code=200)
 
     except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+        print(e)
+    #     return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
 @student_router.post("/student")
