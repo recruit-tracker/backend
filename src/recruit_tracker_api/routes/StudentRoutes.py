@@ -115,6 +115,7 @@ async def delete(request: Request):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=200)
 
+
 @student_router.post("/api/login")
 async def login(request: Request):
     try:
@@ -140,11 +141,12 @@ async def login(request: Request):
                 status_code=401, detail="Password does not match email."
             )
 
-
         # success
         token = utils.create_jwt_token(user)
 
-        return JSONResponse(content={"login": "Login successful!", "token": token}, status_code=200)
+        return JSONResponse(
+            content={"login": "Login successful!", "token": token}, status_code=200
+        )
 
     except HTTPException as he:
         return JSONResponse(
