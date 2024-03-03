@@ -1,10 +1,11 @@
 # PDM
+import tempfile
+
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from gridfs import GridFS
 from openai import OpenAI
 from pymongo import errors
-import tempfile
 
 import recruit_tracker_api.utils as utils
 from recruit_tracker_api.constants import MONGO_URL as url
@@ -26,8 +27,33 @@ async def upload(email: str = Form(...), resume: UploadFile = File(...)):
     pdf_ID = utils.store_pdf(db, pdf, email)  # store pdf in db
 
     user_collection = db["users"]
-    user_collection.update_one({"_id": email}, {"$set": {"pdf_ID": pdf_ID}})
+    user_collection.update_one({"_id": email}, {"$set": {"pdf_ID": str(pdf_ID)}})
 
+
+@student_router.post("/student/resume")
+async def resume(request: Request):
+    user = request["user"]
+    email = user["email"]
+
+    client = init_mongo(url)
+    db = client["recruit_tracker"]
+    user_collection = db["users"]
+
+    # Retrieve PDF ID from user document
+    pdf_ID = user_collection.find_one({"email": email}).get("pdf_ID")
+
+    if not pdf_ID:
+        return {"error": "PDF not found for the user."}
+
+    # Initialize GridFS
+    fs = GridFS(db, collection="pdfs")
+    file_obj = fs.get(pdf_ID)
+
+    if file_obj is None:
+        return {"error": "PDF not found in GridFS."}
+
+    # Return the PDF file using FileResponse
+    return FileResponse(file_obj, media_type="application/pdf")
 
 
 @student_router.post("/student/query")
@@ -47,17 +73,20 @@ async def read(request: Request):
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
-
         if filter_conditions:
             result = user_collection.find(filter_conditions)
         else:
             print("running here")
             result = user_collection.find({})
+
         result_list = list(result)
 
-        for user in result_list: user["_id"] = str(user["_id"])
+        for user in result_list:
+            user["_id"] = str(user["_id"])
 
         client.close()
+
+        print(result_list)
 
         return JSONResponse(content={"users": result_list}, status_code=200)
 
@@ -203,6 +232,3 @@ async def test_gpt(request: Request):
 
     text = completion.choices[0].message  # Extract the text from the completion
     return {"text": text}
-
-
-
