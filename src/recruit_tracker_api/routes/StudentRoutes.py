@@ -26,23 +26,20 @@ async def read(request: Request):
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
-        if content and filter_conditions: result = user_collection.find(filter_conditions)
-        else: result = user_collection.find()
-        
+        if content is not None and filter_conditions: result = user_collection.find(filter_conditions)
+        else: result = user_collection.find({})
+
         result_list = list(result)
 
-        for user in result_list:
-            resume_hash = user.get("resume_hash")
-            pdf = db.fs.pdfs.find_one({"metadata.hash": resume_hash})
-            user["resume"] = pdf
+        for user in result_list: user["_id"] = str(user["_id"])
 
         client.close()
 
         return JSONResponse(content={"users": result_list}, status_code=200)
 
     except Exception as e:
-        print(e)
-    #     return JSONResponse(content={"error": str(e)}, status_code=500)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
 
 
 @student_router.post("/student")
