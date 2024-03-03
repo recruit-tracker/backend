@@ -26,22 +26,42 @@ async def upload(email: str = Form(...), resume: UploadFile = File(...)):
     pdf_ID = utils.store_pdf(db, pdf, email)  # store pdf in db
 
     user_collection = db["users"]
+<<<<<<< HEAD
     user_collection.update_one({"_id": email}, {"$set": {"pdf_ID": pdf_ID}})
+=======
+    print(f"found user: {user_collection.find_one({'_id': email})}")
+    user_collection.update_one({"_id": email}, {"$set": {"resume_hash": file_hash}})
+>>>>>>> 86e8e57fc65f999b973daba4dba8673348ac0344
 
 
 @student_router.post("/student/query")
 async def read(request: Request):
     try:
         request_json = await request.json()
-        content = request_json["content"]
         filter_conditions = request_json.get("filter", {})
+        print(f"FILTER CONDITIONS: {filter_conditions}")
+
+        if filter_conditions is None:
+            filter_conditions = {}
+
+        filter_conditions["role"] = "student"
+        print(filter_conditions)
 
         client = init_mongo(url)
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
+<<<<<<< HEAD
         if content is not None and filter_conditions: result = user_collection.find(filter_conditions)
         else: result = user_collection.find({})
+=======
+        if filter_conditions:
+            result = user_collection.find(filter_conditions)
+        else:
+            print("running here")
+            result = user_collection.find({})
+
+>>>>>>> 86e8e57fc65f999b973daba4dba8673348ac0344
         result_list = list(result)
 
         for user in result_list: user["_id"] = str(user["_id"])
@@ -69,8 +89,9 @@ async def create(request: Request):
         # hash password
         hash_pw = utils.hash_password(user.get("password"))
         user["password"] = hash_pw
+        user["role"] = "student"
 
-        pdf = user.get("resume")
+        user["resume_hash"] = ""
 
         print(user)
         user_collection.insert_one({"_id": user.get("email"), **user})
@@ -130,6 +151,7 @@ async def login(request: Request):
     try:
         json_data = await request.json()
         user = json_data.get("user")
+
         assert (
             user and user.get("email") and user.get("password")
         ), "Email and password are required."
@@ -151,7 +173,7 @@ async def login(request: Request):
             )
 
         # success
-        token = utils.create_jwt_token(user)
+        token = utils.create_jwt_token(user, db)
 
         return JSONResponse(
             content={"login": "Login successful!", "token": token}, status_code=200

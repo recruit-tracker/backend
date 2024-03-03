@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import hashlib, requests
 import tempfile
+=======
+import csv
+import hashlib
+>>>>>>> 86e8e57fc65f999b973daba4dba8673348ac0344
 import json
 from datetime import datetime, timedelta
 import csv, base64, bcrypt, jwt, io
@@ -15,8 +20,6 @@ from fastapi.security import OAuth2PasswordBearer
 
 from gridfs import GridFS
 from pymongo import MongoClient
-import csv
-import json
 
 from recruit_tracker_api.constants import ALGORITHM, SECRET_KEY
 
@@ -33,13 +36,13 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
-def create_jwt_token(user: dict):
-    to_encode = {
-        str(key): value
-        if isinstance(value, (str, int, float, bool, type(None)))
-        else str(value)
-        for key, value in user.items()
-    }
+def create_jwt_token(user: dict, db):
+    user_collection = db["users"]
+    found_user = user_collection.find_one({"email": user["email"]})
+
+    print(found_user)
+
+    to_encode = {"role": found_user["role"], "email": found_user["email"]}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -123,13 +126,14 @@ def binary_to_pdf(binary_data):
 def csv_to_json(csv_file_path):
     json_data = []
 
-    with open(csv_file_path, 'r') as csv_file:
+    with open(csv_file_path, "r") as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
             print(row)
             json_data.append(row)
 
     return json_data
+<<<<<<< HEAD
 
 def binary_to_text(pdf_binary_data):
     try:
@@ -148,3 +152,5 @@ def binary_to_text(pdf_binary_data):
         print(f"Error converting PDF to text: {e}")
         return None
 
+=======
+>>>>>>> 86e8e57fc65f999b973daba4dba8673348ac0344
