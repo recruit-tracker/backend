@@ -90,39 +90,6 @@ def binary_to_pdf(binary_data):
     return pdf_buffer
 
 
-# def send_pdf_to_gpt(pdf_content, gpt_max_tokens=2000):
-#     # Encode the PDF content as base64
-#     # pdf_base64 = base64.b64encode(pdf_content)
-
-#     # jsn_text = json.loads(pdf_content)
-#     # files = {"file": jsn_text}
-
-#     # Prepare the data payload
-#     # payload = {
-#     #     "prompt": gpt_prompt,
-#     #     "max_tokens": gpt_max_tokens,
-#     #     # "file": pdf_base64  # Include the base64-encoded PDF content
-#     # }
-
-#     # headers = {
-#     #     "Content-Type": "application/json",
-#     #     "Authorization": f"Bearer {GPT_KEY}",
-#     # }
-
-#     try:
-#         # Make the request to GPT-3.5 with the PDF file
-#         response = requests.post(GPT_API_ENDPOINT, files=files, headers=headers, json=payload)
-
-#         if response.status_code == 200:
-#             return response.json()
-#         else:
-#             print(f"### BAD NEWS ### {response.status_code}")
-#             return response.json()
-
-#     except requests.RequestException as e:
-#         print(f"Error in sending PDF to GPT: {e}")
-#         return None
-
 def csv_to_json(csv_file_path):
     json_data = []
 
