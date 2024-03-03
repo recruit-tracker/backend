@@ -1,6 +1,7 @@
 # PDM
 import tempfile
 
+from bson.objectid import ObjectId
 from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from gridfs import GridFS
@@ -32,7 +33,8 @@ async def upload(email: str = Form(...), resume: UploadFile = File(...)):
 
 @student_router.post("/student/resume")
 async def resume(request: Request):
-    user = request["user"]
+    json = await request.json()
+    user = json["user"]
     email = user["email"]
 
     client = init_mongo(url)
@@ -47,7 +49,7 @@ async def resume(request: Request):
 
     # Initialize GridFS
     fs = GridFS(db, collection="pdfs")
-    file_obj = fs.get(pdf_ID)
+    file_obj = fs.get(ObjectId(pdf_ID))
 
     if file_obj is None:
         return {"error": "PDF not found in GridFS."}
