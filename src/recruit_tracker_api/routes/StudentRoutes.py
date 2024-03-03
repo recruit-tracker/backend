@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from gridfs import GridFS
 from openai import OpenAI
 from pymongo import errors
+import tempfile
 
 import recruit_tracker_api.utils as utils
 from recruit_tracker_api.constants import MONGO_URL as url
@@ -20,12 +21,12 @@ async def upload(email: str = Form(...), resume: UploadFile = File(...)):
     client = init_mongo(url)
     db = client["recruit_tracker"]
 
-    pdf = await resume.read()
+    pdf = utils.pdf_to_bytes(await resume.read())
 
-    file_hash = utils.store_pdf(db, pdf, email)  # store pdf in db
+    pdf_ID = utils.store_pdf(db, pdf, email)  # store pdf in db
 
     user_collection = db["users"]
-    user_collection.update_one({"_id": email}, {"$set": {"resume_hash": file_hash}})
+    user_collection.update_one({"_id": email}, {"$set": {"pdf_ID": pdf_ID}})
 
 
 @student_router.post("/student/query")
@@ -39,15 +40,12 @@ async def read(request: Request):
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
-        if content is not None and filter_conditions:
-            result = user_collection.find(filter_conditions)
-        else:
-            result = user_collection.find({})
+        if content is not None and filter_conditions: result = user_collection.find(filter_conditions)
+        else: result = user_collection.find({})
 
         result_list = list(result)
 
-        for user in result_list:
-            user["_id"] = str(user["_id"])
+        for user in result_list: user["_id"] = str(user["_id"])
 
         client.close()
 
@@ -193,3 +191,6 @@ async def test_gpt(request: Request):
 
     text = completion.choices[0].message  # Extract the text from the completion
     return {"text": text}
+
+
+
