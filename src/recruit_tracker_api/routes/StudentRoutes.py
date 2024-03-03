@@ -106,7 +106,7 @@ async def delete(request: Request):
 
 
 
-@student_router.post("/student/login")
+@student_router.post("/api/login")
 async def login(request: Request):
     try:
         json_data = await request.json()
@@ -127,7 +127,11 @@ async def login(request: Request):
         if not utils.verify_password(user.get("password"), result.get("password")):
             raise HTTPException(status_code=401, detail="Password does not match email.")
 
-        return JSONResponse(content={"login": "Login successful!"}, status_code=200)
+
+        # success
+        token = utils.create_jwt_token(user)
+
+        return JSONResponse(content={"login": "Login successful!", "token": token}, status_code=200)
 
     except HTTPException as he:
         return JSONResponse(content={"login": str(he.detail)}, status_code=he.status_code)
