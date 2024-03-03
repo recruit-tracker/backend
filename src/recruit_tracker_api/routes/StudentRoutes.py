@@ -1,4 +1,5 @@
 # PDM
+import json
 import tempfile
 from tempfile import NamedTemporaryFile
 
@@ -14,11 +15,22 @@ import recruit_tracker_api.utils as utils
 from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.constants import OPENAI_API_KEY
 from recruit_tracker_api.mongo import init_mongo
+from fastapi.middleware.cors import CORSMiddleware
 
 student_router = APIRouter()
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+
+# app = student_router
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["http://localhost", "http://localhost:3000"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 @student_router.post("/upload")
 async def upload(email: str = Form(...), resume: UploadFile = File(...)):
@@ -35,8 +47,8 @@ async def upload(email: str = Form(...), resume: UploadFile = File(...)):
 
 @student_router.post("/student/resume")
 async def resume(request: Request):
-    json = await request.json()
-    user = json["user"]
+    json_data = await request.json()
+    user = json_data["user"]
     email = user["email"]
 
     client = init_mongo(url)
@@ -44,15 +56,16 @@ async def resume(request: Request):
     user_collection = db["users"]
 
     # Retrieve PDF ID from user document
-    user = user_collection.find_one({"_id": email})
-    print(user)
-    pdf_ID = user.get("pdf_ID")
+    user_doc = user_collection.find_one({"_id": email})
+    print(user_doc)
+    pdf_ID = user_doc.get("pdf_ID")
 
     if not pdf_ID:
         return {"error": "PDF not found for the user."}
 
     # Initialize GridFS
     fs = GridFS(db, collection="pdfs")
+
     file_obj = fs.get(ObjectId(pdf_ID))
 
     if file_obj is None:
@@ -61,11 +74,21 @@ async def resume(request: Request):
     # Retrieve the binary content of the PDF
     pdf_binary = file_obj.read()
 
-    # Set Content-Disposition header with filename
-    headers = {"Content-Disposition": f'attachment; filename="resume.pdf"'}
+    # Write binary content to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+        temp_file.write(pdf_binary)
 
-    # Return the binary content with appropriate headers
-    return Response(content=pdf_binary, media_type="application/pdf", headers=headers)
+        # Convert the PDF to another format if needed
+        # Example: converting to PNG using PyPDF2
+        utils.convert_pdf_to_png(temp_file.name)
+
+        # Set Content-Disposition header with filename
+        headers = {"Content-Disposition": f'attachment; filename="resume.pdf"'}
+
+        # Return the file as a response
+        with open(temp_file.name, 'rb') as output_file:
+            return StreamingResponse(output_file, media_type="application/pdf", headers=headers)
+
 
 
 @student_router.post("/student/query")

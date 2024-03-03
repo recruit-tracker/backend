@@ -31,8 +31,6 @@ async def root():
     return {"message": "FAST!"}
 
 
-from fastapi.responses import JSONResponse
-
 
 @hr_router.post("/hr/import")
 async def import_csv(request: Request):
@@ -83,7 +81,7 @@ async def prompt_gpt(request: Request):
                         text += page.extract_text()
 
                 prompt = "Rate this resume on a scale of 1-10 based on criteria like format, human readability, and other relevant info. Be objective about the resume - do not use personal pronouns. Respond with a few concise recommendations."
-                prompt2 = "You are a staff member in charge of hiring a software engineer. Based on this resume, how likely (out of 10) are they to get a job based on the resume?, "
+                prompt2 = "You are a staff member in charge of hiring a software engineer. Based on this resume, how likely (out of 10) are they to get a job based on the resume? "
 
                 # Use OpenAI API to interact with GPT-3.5 Turbo
                 completion = openAI_client.chat.completions.create(
@@ -108,9 +106,6 @@ async def prompt_gpt(request: Request):
 
             except Exception as e:
                 raise HTTPException(status_code=404, detail=f"File not found: {e}")
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
