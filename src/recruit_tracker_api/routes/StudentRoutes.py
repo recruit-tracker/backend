@@ -76,11 +76,6 @@ async def create(request: Request):
         pdf = user.get("resume")
 
         print(user)
-
-        if pdf:
-            file_hash = utils.store_pdf(db, pdf)  # store pdf in db
-            user["resume_hash"] = file_hash
-
         user_collection.insert_one({"_id": user.get("email"), **user})
 
         client.close()
