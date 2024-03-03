@@ -26,7 +26,9 @@ async def read(request: Request):
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
-        result = user_collection.find(filter_conditions)
+        if content and filter_conditions: result = user_collection.find(filter_conditions)
+        else: result = user_collection.find()
+        
         result_list = list(result)
 
         for user in result_list:
@@ -75,9 +77,9 @@ async def create(request: Request):
             status_code=409,
         )
 
-    # except Exception as e:
-    #     print(e)
-    #     return JSONResponse(content={"error": str(e)}, status_code=500)
+    except Exception as e:
+        print(e)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
 @student_router.post("/student/update")

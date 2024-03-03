@@ -9,6 +9,8 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from gridfs import GridFS
 from pymongo import MongoClient
+import csv
+import json
 
 from recruit_tracker_api.constants import ALGORITHM, SECRET_KEY
 
@@ -65,3 +67,16 @@ def store_pdf(db, pdf):
 
     fs.put(pdf.encode(), metadata={"hash": file_hash})
     return file_hash
+
+
+def csv_to_json(csv_file_path):
+    json_data = []
+
+    with open(csv_file_path, 'r') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        for row in csv_reader:
+            print(row)
+            json_data.append(row)
+
+    return json_data
+
