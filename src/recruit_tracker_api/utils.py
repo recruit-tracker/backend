@@ -1,10 +1,10 @@
-<<<<<<< HEAD
+
 import hashlib, requests
 import tempfile
-=======
+
 import csv
 import hashlib
->>>>>>> 86e8e57fc65f999b973daba4dba8673348ac0344
+
 import json
 from datetime import datetime, timedelta
 import csv, base64, bcrypt, jwt, io
@@ -133,7 +133,6 @@ def csv_to_json(csv_file_path):
             json_data.append(row)
 
     return json_data
-<<<<<<< HEAD
 
 def binary_to_text(pdf_binary_data):
     try:
@@ -151,6 +150,3 @@ def binary_to_text(pdf_binary_data):
         # Handle exceptions, such as invalid PDF format
         print(f"Error converting PDF to text: {e}")
         return None
-
-=======
->>>>>>> 86e8e57fc65f999b973daba4dba8673348ac0344
