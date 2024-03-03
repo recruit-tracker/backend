@@ -25,6 +25,7 @@ async def upload(email: str = Form(...), resume: UploadFile = File(...)):
     file_hash = utils.store_pdf(db, pdf, email)  # store pdf in db
 
     user_collection = db["users"]
+    print(f"found user: {user_collection.find_one({'_id': email})}")
     user_collection.update_one({"_id": email}, {"$set": {"resume_hash": file_hash}})
 
 
@@ -32,16 +33,23 @@ async def upload(email: str = Form(...), resume: UploadFile = File(...)):
 async def read(request: Request):
     try:
         request_json = await request.json()
-        content = request_json["content"]
         filter_conditions = request_json.get("filter", {})
+        print(f"FILTER CONDITIONS: {filter_conditions}")
+
+        if filter_conditions is None:
+            filter_conditions = {}
+
+        filter_conditions["role"] = "student"
+        print(filter_conditions)
 
         client = init_mongo(url)
         db = client["recruit_tracker"]
         user_collection = db["users"]
 
-        if content is not None and filter_conditions:
+        if filter_conditions:
             result = user_collection.find(filter_conditions)
         else:
+            print("running here")
             result = user_collection.find({})
 
         result_list = list(result)
@@ -72,8 +80,9 @@ async def create(request: Request):
         # hash password
         hash_pw = utils.hash_password(user.get("password"))
         user["password"] = hash_pw
+        user["role"] = "student"
 
-        pdf = user.get("resume")
+        user["resume_hash"] = ""
 
         print(user)
         user_collection.insert_one({"_id": user.get("email"), **user})
@@ -133,6 +142,7 @@ async def login(request: Request):
     try:
         json_data = await request.json()
         user = json_data.get("user")
+
         assert (
             user and user.get("email") and user.get("password")
         ), "Email and password are required."
@@ -154,7 +164,7 @@ async def login(request: Request):
             )
 
         # success
-        token = utils.create_jwt_token(user)
+        token = utils.create_jwt_token(user, db)
 
         return JSONResponse(
             content={"login": "Login successful!", "token": token}, status_code=200

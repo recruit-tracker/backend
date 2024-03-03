@@ -1,12 +1,15 @@
 # PDM
+import csv
+import json
+
+import jwt
+import pymongo
 from fastapi import APIRouter, Request
 from starlette.responses import JSONResponse
-import csv, json, pymongo, jwt
+
 import recruit_tracker_api.utils as utils
 from recruit_tracker_api.constants import MONGO_URL as url
 from recruit_tracker_api.mongo import init_mongo
-
-
 
 hr_router = APIRouter()
 
@@ -15,7 +18,9 @@ hr_router = APIRouter()
 async def root():
     return {"message": "FAST!"}
 
+
 from fastapi.responses import JSONResponse
+
 
 @hr_router.post("/admin/import")
 async def import_csv(request: Request):
@@ -37,5 +42,6 @@ async def import_csv(request: Request):
         return JSONResponse(content={"Import": "Import Successful!"}, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+
 
 # print(utils.csv_to_json("../test.csv"))
