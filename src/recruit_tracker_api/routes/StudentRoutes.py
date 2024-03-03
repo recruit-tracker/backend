@@ -21,7 +21,7 @@ async def upload(email: str = Form(...), resume: UploadFile = File(...)):
     client = init_mongo(url)
     db = client["recruit_tracker"]
 
-    pdf = utils.pdf_to_bytes(await resume.read())
+    pdf = await resume.read()
 
     pdf_ID = utils.store_pdf(db, pdf, email)  # store pdf in db
 

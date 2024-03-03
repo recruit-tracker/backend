@@ -70,11 +70,13 @@ def decode_role(current_user: dict = Depends(get_current_user)):
 
 
 def store_pdf(db, pdf, email):
+
+
     fs = GridFS(db, collection="pdfs")  # Use a custom collection for PDFs
 
     try:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            tmp.write(pdf.read())
+            tmp.write(pdf)
             tmp.close()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -118,9 +120,10 @@ def binary_to_text(pdf_binary_data):
         print(f"Error converting PDF to text: {e}")
         return None
 
+
 def pdf_to_bytes(pdf_data):
-    pdf_reader = PyPDF2.PdfFileReader(pdf_data)
-    pdf_writer = PyPDF2.PdfFileWriter()
+    pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_data))
+    pdf_writer = PyPDF2.PdfWriter()
 
     # Copy all pages from the reader to the writer
     for page_num in range(pdf_reader.getNumPages()):
